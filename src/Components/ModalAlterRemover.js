@@ -8,14 +8,14 @@ class ModalAlterarRemover extends Component{
 
     constructor(props) {
         super(props)
-        this.state = {show: false, title: "", body: ""}
+        this.state = {show: false, title: "", body: "", documento: ""}
     }
 
-    handleClose = () => this.setState({show: false, title: "", body: ""})
+    handleClose = () => this.setState({show: false, title: "", body: "", documento: ""})
     handleShow = modal => this.setState( modal )
 
     excluirDocumento = () =>{
-        CadastroApi.deletarCadastro(this.state.formCadastro.cpf)
+        CadastroApi.deletarCadastro(this.state.documento)
         .then( response => {
             console.log(response)
         })
@@ -32,7 +32,7 @@ class ModalAlterarRemover extends Component{
                     </Modal.Header>
                     <Modal.Body>
                         {body}
-                        <Button>Alterar</Button>
+                        <Button onClick={this.handleClose}>Alterar</Button>
                         <Button onClick={this.excluirDocumento}>Remover</Button>
                     </Modal.Body>
                     <Modal.Footer>

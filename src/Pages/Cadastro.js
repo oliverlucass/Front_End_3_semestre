@@ -15,6 +15,7 @@ class Cadastro extends Component {
         }
 
         this.modalRef = createRef()
+        this.modalRefAlterarRemover = createRef()
     }
 
     aceitarTermo = () =>{
@@ -38,7 +39,8 @@ class Cadastro extends Component {
                 numeroLogradouro: "", 
                 email: "", 
                 expectativa: "", 
-                aceito: false
+                aceito: false,
+                id: ""
         }
     }
 
@@ -63,7 +65,7 @@ class Cadastro extends Component {
     }
 
     mostralModalAlterarRemover = (title, body) => {
-        this.modalRef.current.handleShow({show: true, title, body})
+        this.modalRef.current.handleShow({show: true, title, body, documento: this.state.formCadastro.cpf.replace(/\D/g, "")})
     }
 
     componentDidMount(){
@@ -98,11 +100,17 @@ class Cadastro extends Component {
     }
 
     pesquisarDocumento = () =>{
-        CadastroApi.consultarCadastro(this.state.formCadastro.cpf)
+        CadastroApi.consultarCadastro(this.state.formCadastro.cpf.replace(/\D/g, ""))
         .then( response => {
             console.log(response)
             if(response.status == 200){
                 this.mostralModalAlterarRemover("Atenção", "Usuario Cadastro!!")
+                if(response.data.expectativa === null){
+                    response.data.expectativa = "";
+                }
+                this.setState({
+                    formCadastro: {...this.state.formCadastro, ...response.data}
+                })
             }
         })
     }
@@ -112,9 +120,14 @@ class Cadastro extends Component {
         const form = this.state.formCadastro
         form.cpf = form.cpf.replace(/\D/g, "")
         form.cep = form.cep.replace(/\D/g, "")
+        let metodo = null;
 
-        CadastroApi.cadastrar(form)
-        .then( response => { 
+        if(form.id){
+            metodo = CadastroApi.mudarCadastro(form)
+        }else{
+            metodo = CadastroApi.cadastrar(form)
+        }
+        metodo.then( response => { 
             if(response.data && response.data.message){
                 this.mostrarModal("Atenção!", response.data.message)
             }else{
@@ -374,7 +387,7 @@ class Cadastro extends Component {
                     </form>
                 </section>
                 <ModalAlert ref={this.modalRef} />
-                <ModalAlterarRemover ref={this.modalRef} />
+                <ModalAlterarRemover ref={this.modalRefAlterarRemover} />
             </Fragment>
         )
     }
